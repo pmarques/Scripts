@@ -32,14 +32,26 @@ ${$confs}{'MSG' }{'COLOR'}{'E'} = 'red';
 ${$confs}{'MSG' }{'SPACE'} = 0;
 
 my @colors = qw(red green yellow blue magenta cyan white);
+my $ops;
 
-while( <> ) {
+if(-t STDIN) { # No stdin try execut adb logcat
+	my $pid = open(STDIN, "adb logcat $ops |") or die ("catn open adb logcat with this options $_");
+	if( $#ARGV > 0 ) {
+		$ops = join(' ',@ARGV);
+	}
+} else { # Read from stdin
+}
+
+
+while (<STDIN>) {
+#while( <> ) {
 	my $prio;
 	my $tag;
 	my $pid;
 	my $msg;
 	
-	/(.)\/(.*)\(\s*(.*)\s*\):(.*)/ or die ("logcat format is unknown...\n'$_'\n");
+	#/(.)\/(.*)\(\s*(\d*)\s*\):(.*)/ or die ("logcat format is unknown...\n'$_'\n");
+	/^([A-Z])\/([^\(]+)\(([^\)]+)\): (.*)$/ or die ("logcat format is unknown...\n'$_'\n");
 
 	$prio = $1;
 	$tag = $2;
@@ -55,15 +67,15 @@ while( <> ) {
 		@colors = (@colors, $color);
 	}
 
-	print colored( sprintf( "%*s ", ${$confs}{'TAG' }{'SPACE'}, $tag ), ${$confs}{'TAG' }{'COLOR'}{$tag} );
-	
-	print colored( sprintf( "%*s ", ${$confs}{'PRIO'}{'SPACE'}, $prio), ${$confs}{'PRIO'}{$prio} );
+	print colored( sprintf( "%*.*s ", ${$confs}{'TAG' }{'SPACE'}, ${$confs}{'TAG' }{'SPACE'}, $tag ), ${$confs}{'TAG' }{'COLOR'}{$tag} );
+	                                                              
+	print colored( sprintf( "%*.*s ", ${$confs}{'PRIO'}{'SPACE'}, ${$confs}{'PRIO'}{'SPACE'}, $prio), ${$confs}{'PRIO'}{$prio} );
 
 	# Hilight text messages
 	if( exists ${$confs}{'MSG' }{'COLOR'}{$prio} ) {
-		print colored( sprintf( "%*s ", ${$confs}{'MSG' }{'SPACE'}, $msg ), ${$confs}{'MSG' }{'COLOR'}{$prio} );
-	} else {
-		print colored( sprintf( "%*s ", ${$confs}{'MSG' }{'SPACE'}, $msg ), ${$confs}{'MSG' }{'COLOR'}{'DEFAULT'} );
+		print colored( sprintf( " %*.*s", ${$confs}{'MSG' }{'SPACE'}, ${$confs}{'MSG' }{'SPACE'}, $msg ), ${$confs}{'MSG' }{'COLOR'}{$prio} );
+	} else {                                                          
+		print colored( sprintf( " %s", $msg ), ${$confs}{'MSG' }{'COLOR'}{'DEFAULT'} );
 	}
 	print "\n";
 }
