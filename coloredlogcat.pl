@@ -39,7 +39,7 @@ ${$confs}{'MSG' }{'SPACE'} = 0;
 
 # Circular colors to undifined tags
 my @colors = qw(red green yellow blue magenta cyan white);
-my $ops;
+my $ops = '';
 my $columns;
 my $rows;
 
@@ -70,7 +70,7 @@ while (<STDIN>) {
 	my $msg;
 	my $color;
 	
-	/^([VDIWE])\/([^\(]+)\(([^\)]+)\):(.*)$/ or die ("logcat format is unknown...\n'$_'\n");
+	/^([VDIWE])\/([^\(]+)\(([^\)]+)\):(.*)$/ or next; #die ("logcat format is unknown...\n'$_'\n");
 
 	$prio = $1;
 	$tag = $2;
