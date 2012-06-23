@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #
 # Created by Patrick F. Marques 
 # patrickfmarques AT gmail DOT com
@@ -22,7 +22,10 @@ RSYNC_OPTS="\
 --progress \
 --delete \
 --delete-excluded \
---hard-links"
+--hard-links \
+--perms \
+--times \
+--quiet "
 
 ###################################
 # Initial requirements
@@ -44,17 +47,24 @@ fi
 ###################################
 # Configuration file verifications
 
+if [ $DIRECTION == "" ]; then
+	echo "A direction is requiered!"
+	exit 1
+fi
+
+if [ $DIRECTION == "R-L" ]; then RL=1; else RL=0; fi
+
 # Check source dir
-if [ ! -d $SOURCE ]; then
-	echo "Source must be a directory"
+if [ $RL -eq 1 -a ! -d "$SOURCE" ]; then
+	echo "Source must be a local directory"
 	exit
 fi
 
 # Check destination dir
-#if [ ! -d $TARGET ]; then
-#	echo "Destination must be a directory"
-#	exit
-#fi
+if [ $RL -eq 0 -a ! -d "$TARGET" ]; then
+	echo "Destination must be local a directory"
+	exit
+fi
 
 # If file exist create hardlinks to it
 CURRENT="$TARGET/current"
@@ -63,7 +73,13 @@ CURRENT="$TARGET/current"
 #fi
 RSYNC_OPTS="$RSYNC_OPTS --link-dest=../current"
 
-DESTINATION="$HOST:$TARGET/$DATE/"
+if [ $RL -eq 0 ]; then
+	DESTINATION="$HOST:$TARGET/$DATE/"
+	ORIGIN="$SOURCE"
+else
+	ORIGIN="$HOST:$SOURCE"
+	DESTINATION="$TARGET/$DATE/"
+fi
 
 # Exclude files if this is set
 for ex in  $IGNORE_FILES; do
@@ -73,16 +89,19 @@ done
 RSYNC_OPTS="$RSYNC_OPTS $EXCLUDE $OPTIONS"
 
 # run rsync
-$RSYNC $RSYNC_OPTS $SOURCE $DESTINATION
+$RSYNC $RSYNC_OPTS $ORIGIN $DESTINATION
 
 # Point link to last backup
-#if [ -h $CURRENT ]; then
-#	unlink $CURRENT
-#fi
-#ln -s $DATE $CURRENT
-ssh $HOST \
-"unlink $CURRENT; \ 
-ln -s $DATE $CURRENT"
+if [ $RL -eq 1 ]; then
+	if [ -h $CURRENT ]; then
+		unlink $CURRENT
+	fi
+	ln -s $DATE $CURRENT
+else
+	ssh $HOST \
+	"unlink $CURRENT; \ 
+	ln -s $DATE $CURRENT"
+fi
 
 echo "Backup successful!"
 echo "End: `date`"
