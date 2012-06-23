@@ -25,7 +25,9 @@ RSYNC_OPTS="\
 --hard-links \
 --perms \
 --times \
---quiet "
+--quiet \
+--numeric-ids \
+"
 
 ###################################
 # Initial requirements
