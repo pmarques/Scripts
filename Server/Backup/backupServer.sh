@@ -27,6 +27,8 @@ RSYNC_OPTS="\
 --times \
 --quiet \
 --numeric-ids \
+--links \
+--hard-links \
 "
 
 ###################################
