@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 #
 # Created by Patrick F. Marques 
 # patrickfmarques AT gmail DOT com
@@ -37,13 +37,20 @@ RSYNC_OPTS="\
 # rsync is required!
 if [ ! -x $RSYNC ]; then
 	echo "Cannot find rsync: $RSYNC"
-	exit
+	exit 1
+fi
+
+if [ $# -eq 1 ]; then
+	CONFIGURATION_FILE=$1
+else
+        echo -e "Configuration file not specified!"
+        exit 1
 fi
 
 # configuration file is required!
 if [ ! -f $CONFIGURATION_FILE ]; then
 	echo "Configuration file not found"
-	exit
+	exit 1
 fi
 
 # Load configuration file
@@ -61,13 +68,13 @@ if [ $DIRECTION == "R-L" ]; then RL=1; else RL=0; fi
 # Check source dir
 if [ $RL -eq 1 -a ! -d "$SOURCE" ]; then
 	echo "Source must be a local directory"
-	exit
+	exit 1
 fi
 
 # Check destination dir
 if [ $RL -eq 0 -a ! -d "$TARGET" ]; then
 	echo "Destination must be local a directory"
-	exit
+	exit 1
 fi
 
 # If file exist create hardlinks to it
@@ -75,7 +82,7 @@ CURRENT="$TARGET/current"
 #if [ -h $CURRENT ]; then
 #	RSYNC_OPTS="$RSYNC_OPTS --link-dest=$CURRENT"
 #fi
-RSYNC_OPTS="$RSYNC_OPTS --link-dest=../current"
+RSYNC_OPTS="$RSYNC_OPTS --link-dest=$TARGET/current"
 
 if [ $RL -eq 0 ]; then
 	DESTINATION="$HOST:$TARGET/$DATE/"
