@@ -52,10 +52,12 @@ class CLI(threading.Thread):
 
   def add(self, name, func):
     self.cmdList[name] = func
+  # end add
 
   def confOnExit(self, fun, params = None):
     self.onExitFun = fun
     self.onExitPrams = params
+  # end confOnExit
 
   def run(self):
     LOG.debug("Start CLI main loop")
@@ -68,35 +70,46 @@ class CLI(threading.Thread):
         cmd = parts[0].lower()
         params = parts[1] if len(parts) > 1 else None
         self.process(cmd, params)
+      except EOFError:
+        # CTRL-D
+        LOG.info("CTRL-D, exit")
+        self.running = False
       except:
         print '-'*60
         LOG.exception("Something is going wrong...")
         print '-'*60
+        # Do not stop main loop
+        continue
     # END while
     self.onExit()
+  # end run
 
   def process(self, cmd, params):
     try:
       func = self.cmdList[cmd]
     except KeyError:
-      print "Unknown command [%s]" % cmd
+      LOG.error("Unknown command [%s]" % cmd)
       return
     func(params, self.staticParams)
+  # end process
 
   def stop(self, params, _):
     LOG.debug("Stop CLI main loop")
     self.running = False
     print "Have a nice day :)"
+  # end stop
 
   def listCMD(self, params, _):
     LOG.debug("List all available commands")
     for f in self.cmdList:
       print " * %s" % (f)
+  # end listCMD
 
   def onExit(self):
     LOG.debug("Call on Exit handler")
     if hasattr(self, 'onExitFun'):
       self.onExitFun(self.onExitPrams)
+  # end onExit
 #end Class CLI
 
 def helpCMD(_, __):
