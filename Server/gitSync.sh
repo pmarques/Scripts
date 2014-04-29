@@ -22,7 +22,7 @@ for PROJECT in $PROJECTS ; do
 		else
 			git $GIT_BASE pull
 		fi
-		git $GIT_BASE push $GIT_K2C_REMOTE
+		git $GIT_BASE push $GIT_K2C_REMOTE '*:*' --tags
 		popd
 	fi
 done
