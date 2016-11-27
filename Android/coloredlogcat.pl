@@ -57,7 +57,7 @@ if(-t STDIN) {
 	if( $#ARGV > 0 ) {
 		$ops = join(' ',@ARGV);
 	}
-	open(STDIN, "adb $ops logcat |") or die ("catn open adb logcat with options '$ops'");
+	open(STDIN, "adb $ops logcat -v brief |") or die ("catn open adb logcat with options '$ops'");
 } else {
 	# Read from stdin
 }
