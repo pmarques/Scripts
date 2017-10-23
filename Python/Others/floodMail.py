@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import smtplib  
 from email.mime.text import MIMEText
 from time import sleep
@@ -21,15 +23,15 @@ server.login(username,password)
 
 write = sys.stdout.write
 for i in range( numberMessages ):
-  write('\r%d%' % (i))
-  sys.stdout.flush()
   msg = MIMEText('content' )
   msg['Subject'] = '<subject>'
   msg['From'] = fromaddr
   msg['To'] = toaddrs
   msg = msg.as_string()
   server.sendmail(fromaddr, toaddrs, msg)
+  write('\r%4d' % (i + 1))
+  sys.stdout.flush()
   sleep(5)
 
-print "Done :)"
+print "\nDone :)"
 server.quit()
